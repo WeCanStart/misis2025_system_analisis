@@ -2,9 +2,7 @@ from typing import List, Tuple
 from task1.task import main as matrix_to_relations
 import numpy as np
 
-# calculate graph entropy using main
-# from task1.task
-
+# calculate graph entropy using main from task1.task
 # and formula for particular node's and tuple's element entropy:
 # calculate number of outgoing edges (n) and with s as number of nodes - 1 we have: H_ij = -n / s * log2(n / s)
 # then result is sum of all H_ij (for all nodes and all tuple elements)

@@ -30,11 +30,12 @@ def main(csv_string: str) -> List[List[bool]]:
     return result
 
 # Пример
-csv_data = '''1,2
-1,3
-3,4
-3,5'''
+if __name__ == '__main__':
+    csv_data = '''1,2
+    1,3
+    3,4
+    3,5'''
 
-matrix = main(csv_data)
-for row in matrix:
-    print(row)
+    matrix = main(csv_data)
+    for row in matrix:
+        print(row)

@@ -36,15 +36,16 @@ def main(csv_string: str) -> Tuple[
     return tuple(mat.tolist() for mat in (r1, r2, r3, r4, r5))
 
 # Пример
-csv_data = '''1,2
-1,3
-3,4
-3,5'''
+if __name__ == '__main__':
+    csv_data = '''1,2
+    1,3
+    3,4
+    3,5'''
 
-r1, r2, r3, r4, r5 = main(csv_data)
+    r1, r2, r3, r4, r5 = main(csv_data)
 
-for name, mat in zip(['r1','r2','r3','r4','r5'], [r1,r2,r3,r4,r5]):
-    print(f"{name}:")
-    for row in mat:
-        print(row)
-    print()
+    for name, mat in zip(['r1','r2','r3','r4','r5'], [r1,r2,r3,r4,r5]):
+        print(f"{name}:")
+        for row in mat:
+            print(row)
+        print()

@@ -177,7 +177,7 @@ def build_final_ranking(C, elems, contradictions):
     
     return final
 
-def main(s1, s2, cont=False):
+def main(s1, s2):
     r1 = json.loads(s1)
     r2 = json.loads(s2)
     
@@ -210,18 +210,4 @@ def main(s1, s2, cont=False):
     
     final_ranking = build_final_ranking(C, elems, contradictions)
     
-    if cont:
-        return json.dumps(final_ranking, ensure_ascii=False), contradictions
     return json.dumps(final_ranking, ensure_ascii=False)
-
-if __name__ == "__main__":
-
-    ranking1 = [1, [2, 3], 4, [5, 6, 7], 8, 9, 10]
-    ranking2 = [[1, 2], [3, 4, 5], 6, 7, 9, [8, 10]]
-    ranking1_json = json.dumps(ranking1)
-    ranking2_json = json.dumps(ranking2)
-    
-    result_json, contradictions = main(ranking1_json, ranking2_json, cont=True)
-    
-    print(f"Противоречия: {json.dumps(contradictions, ensure_ascii=False)}")
-    print(f"Согласованная кластерная ранжировка: {result_json}")

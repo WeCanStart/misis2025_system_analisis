@@ -1,12 +1,8 @@
 import json
 from math import isclose
 
-def main(LVinput, LVoutput, rules, T, verbose=False):
+def main(LVinput, LVoutput, rules, T):
     tol = 1e-9
-
-    def log(*args):
-        if verbose:
-            print("[ЛОГ]", *args)
 
     def parse_lv(json_obj):
         if isinstance(json_obj, str):
@@ -144,8 +140,6 @@ def main(LVinput, LVoutput, rules, T, verbose=False):
     for name, pts in LVin.items():
         deg = float(eval_piecewise(pts, T))
         input_deg[name] = deg
-    log("T =", float(T))
-    log("входные степени =", json.dumps(input_deg, ensure_ascii=False))
     out_alpha = {}
     for a,b in rules_pairs:
         deg = input_deg.get(a, 0.0)
@@ -153,31 +147,26 @@ def main(LVinput, LVoutput, rules, T, verbose=False):
             out_alpha[b] = float(deg)
     for outname in LVout.keys():
         out_alpha.setdefault(outname, 0.0)
-    log("альфа выходов =", json.dumps(out_alpha, ensure_ascii=False))
     clipped_map = {}
     for outname, pts in LVout.items():
         alpha = out_alpha.get(outname, 0.0)
         if alpha <= tol:
             clipped_map[outname] = []
-            log(f"клиппинг[{outname}]: all zeros")
         else:
             clipped = clip_function_preserve_plateau(pts, alpha)
             clipped_map[outname] = clipped
             clipped_r = [(round(x,6), round(y,6)) for x,y in clipped]
-            log(f"клиппинг[{outname}]:", clipped_r)
     all_y = []
     for pts in clipped_map.values():
         for x,y in pts:
             all_y.append(y)
     max_y = max(all_y) if all_y else 0.0
-    log("глобальный максимум y =", round(max_y,6))
     if max_y <= tol:
         mids_all = []
         for pts in LVout.values():
             if pts:
                 mids_all.append((pts[0][0] + pts[-1][0]) / 2.0)
         fallback = float(sum(mids_all) / len(mids_all)) if mids_all else 0.0
-        log("фоллбэк =", round(fallback,6))
         return fallback
     raw_intervals = []
     for name, pts in clipped_map.items():
@@ -198,7 +187,6 @@ def main(LVinput, LVoutput, rules, T, verbose=False):
             else:
                 i += 1
     raw_int_log = [ (round(l,6), round(r,6), n) for l,r,n in raw_intervals ]
-    log("сырые интервалы =", raw_int_log)
     intervals = []
     raw_sorted = sorted([(l,r) for l,r,n in raw_intervals], key=lambda p: p[0])
     for l,r in raw_sorted:
@@ -210,9 +198,7 @@ def main(LVinput, LVoutput, rules, T, verbose=False):
             else:
                 intervals.append([l,r])
     intervals = [(float(a), float(b)) for a,b in intervals]
-    log("объединённые интервалы =", [(round(a,6), round(b,6)) for a,b in intervals])
     L = sum(max(0.0, r - l) for l,r in intervals)
-    log("длина L =", round(L,6))
     if L <= tol:
         pts_x = []
         for l,r in intervals:
@@ -224,95 +210,13 @@ def main(LVinput, LVoutput, rules, T, verbose=False):
                     if isclose(y, max_y, abs_tol=1e-7):
                         xs_at_max.append(x)
             if not xs_at_max:
-                log("нет максимумов, вернуть 0")
                 return 0.0
             res = float(sum(xs_at_max) / len(xs_at_max))
-            log("дегенерат centroid =", round(res,6))
             return res
         res = float(sum(pts_x) / len(pts_x))
-        log("дегенерат centroid интервалы =", round(res,6))
         return res
     s = 0.0
     for l,r in intervals:
         s += (r*r - l*l)
     x_opt = 0.5 * s / L
-    log("центр. числитель =", round(s,6))
-    log("x_opt =", round(x_opt,6))
     return float(x_opt)
-
-
-if __name__ == '__main__':
-    print(main('''
-{
-    "температура": [
-        {
-            "id": "холодно",
-            "points": [
-                [0,1],
-                [18,1],
-                [22,0],
-                [50,0]
-            ]
-        },
-        {
-            "id": "комфортно",
-            "points": [
-                [18,0],
-                [22,1],
-                [24,1],
-                [26,0]
-            ]
-        },
-        {
-            "id": "жарко",
-            "points": [
-                [0,0],
-                [24,0],
-                [26,1],
-                [50,1]
-            ]
-        }
-    ]
-}
-''',
-'''
-{
-  "управление": [
-      {
-        "id": "слабо",
-        "points": [
-            [0,0],
-            [0,1],
-            [5,1],
-            [8,0]
-        ]
-      },
-      {
-        "id": "умеренно",
-        "points": [
-            [5,0],
-            [8,1],
-            [13,1],
-            [16,0]
-        ]
-      },
-      {
-        "id": "интенсивно",
-        "points": [
-            [13,0],
-            [18,1],
-            [23,1],
-            [26,0]
-        ]
-      }
-  ]
-}
-''',
-'''
-{
-  "холодно": "интенсивно",
-  "комфортно": "умеренно",
-  "жарко": "слабо"
-}
-''',
-25, verbose=True))

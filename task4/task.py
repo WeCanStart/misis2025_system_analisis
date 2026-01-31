@@ -1,7 +1,7 @@
 import json
 from math import isclose
 
-def main(LVinput, LVoutput, rules, T):
+def main(LVinput: str, LVoutput: str, rules: str, T: float) -> float:
     tol = 1e-9
 
     def parse_lv(json_obj):

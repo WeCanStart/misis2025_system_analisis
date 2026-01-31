@@ -177,7 +177,7 @@ def build_final_ranking(C, elems, contradictions):
     
     return final
 
-def main(s1, s2):
+def main(s1: str, s2: str) -> str:
     r1 = json.loads(s1)
     r2 = json.loads(s2)
     
